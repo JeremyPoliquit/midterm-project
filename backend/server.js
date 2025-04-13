@@ -22,6 +22,8 @@ db.connect(err => {
   console.log('Connected to MySQL');
 });
 
-app.use('/api/auth', authRoutes(db)); // pass db to routes
+app.use('/api/student', authRoutes(db)); // student crud
+app.use('/api/auth', authRoutes(db)); // register/login
+
 
 app.listen(5000, () => console.log('Backend running on port 5000'));
