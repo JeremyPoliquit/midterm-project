@@ -1,0 +1,286 @@
+// app/dashboard/professor/page.jsx (assuming you're using app directory and JSX)
+
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+
+const page = () => {
+  const [token, setToken] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
+
+  // Full Insert Form
+  const [student_number, setStudentNumber] = useState("");
+  const [student_name, setStudentName] = useState("");
+  const [course, setCourse] = useState("");
+  const [year_level, setYearLevel] = useState("");
+  const [semester, setSemester] = useState("");
+  const [student_status, setStudentStatus] = useState("");
+  const [user_number, setUserNumber] = useState("");
+  const [user_password, setUserPassword] = useState("");
+  const [course_code, setCourseCode] = useState("");
+  const [output, setOutput] = useState("");
+  const [scores, setScores] = useState("");
+
+  // Add Record Only Form
+  const [record_student_number, setRecordStudentNumber] = useState("");
+  const [record_course_code, setRecordCourseCode] = useState("");
+  const [record_output, setRecordOutput] = useState("");
+  const [record_scores, setRecordScores] = useState("");
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) return;
+
+    setToken(storedToken);
+    const decoded = jwtDecode(storedToken);
+    setUserInfo(decoded);
+  }, []);
+
+  const handleFullInsert = async (e) => {
+    e.preventDefault();
+
+    // Validate that the required fields are not empty
+    if (
+      !student_number ||
+      !student_name ||
+      !course ||
+      !year_level ||
+      !semester ||
+      !student_status ||
+      !user_number ||
+      !user_password ||
+      !course_code ||
+      !output ||
+      !scores
+    ) {
+      alert("Please fill all fields before submitting.");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/student/create/record",
+        {
+          student_number,
+          student_name,
+          course,
+          year_level,
+          semester,
+          student_status,
+          user_number,
+          user_password,
+          course_code,
+          output,
+          scores,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Full student + record inserted!");
+      // Reset form after successful submission (optional)
+      setStudentNumber("");
+      setStudentName("");
+      setCourse("");
+      setYearLevel("");
+      setSemester("");
+      setStudentStatus("");
+      setUserNumber("");
+      setUserPassword("");
+      setCourseCode("");
+      setOutput("");
+      setScores("");
+    } catch (err) {
+      console.error("Error during full insert:", err);
+
+      // Handle specific errors based on the response from backend
+      if (err.response) {
+        // Server responded with a status other than 2xx
+        alert(
+          `Error: ${err.response.data.error || "An unexpected error occurred"}`
+        );
+      } else if (err.request) {
+        // No response from server
+        alert("Server did not respond. Please try again.");
+      } else {
+        // Something else caused the error
+        alert("Full insert failed. Please check the inputs and try again.");
+      }
+    }
+  };
+
+  const handleRecordOnlyInsert = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/student/add-record-only",
+        {
+          student_number: record_student_number,
+          course_code: record_course_code,
+          output: record_output,
+          scores: record_scores,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Record inserted successfully!");
+      setRecordStudentNumber("")
+      setCourseCode("");
+      setOutput("");
+      setScores("");
+    } catch (err) {
+      console.error(err);
+      alert("Record only insert failed.");
+    }
+  };
+  return (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Professor Dashboard</h1>
+
+      <div className="grid md:grid-cols-2 gap-10">
+        {/* Full Insert Form */}
+        <div className="bg-base-200 p-6 rounded-xl shadow-xl">
+          <h2 className="text-xl font-bold mb-4">
+            Full Insert (New Student + Record)
+          </h2>
+          <form onSubmit={handleFullInsert} className="grid gap-4">
+            <input
+              type="text"
+              placeholder="Student Number"
+              className="input input-bordered"
+              onChange={(e) => setStudentNumber(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Student Name"
+              className="input input-bordered"
+              onChange={(e) => setStudentName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Course"
+              className="input input-bordered"
+              onChange={(e) => setCourse(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Year Level"
+              className="input input-bordered"
+              onChange={(e) => setYearLevel(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Semester"
+              className="input input-bordered"
+              onChange={(e) => setSemester(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Student Status"
+              className="input input-bordered"
+              onChange={(e) => setStudentStatus(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="User Number"
+              className="input input-bordered"
+              onChange={(e) => setUserNumber(e.target.value)}
+              required
+            />
+            <input
+              type="password"
+              placeholder="User Password"
+              className="input input-bordered"
+              onChange={(e) => setUserPassword(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Course Code"
+              className="input input-bordered"
+              onChange={(e) => setCourseCode(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Output"
+              className="input input-bordered"
+              onChange={(e) => setOutput(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Scores"
+              className="input input-bordered"
+              onChange={(e) => setScores(e.target.value)}
+              required
+            />
+            <button type="submit" className="btn btn-primary">
+              Insert Full Record
+            </button>
+          </form>
+        </div>
+
+        {/* Record Only Form */}
+        <div className="bg-base-200 p-6 rounded-xl shadow-xl">
+          <h2 className="text-xl font-bold mb-4">
+            Add Output to Existing Student
+          </h2>
+          <form onSubmit={handleRecordOnlyInsert} className="grid gap-4">
+            <input
+              type="text"
+              placeholder="Student Number"
+              className="input input-bordered"
+              value={record_student_number}
+              onChange={(e) => setRecordStudentNumber(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Course Code"
+              className="input input-bordered"
+              value={record_course_code}
+              onChange={(e) => setRecordCourseCode(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Output"
+              className="input input-bordered"
+              value={record_output}
+              onChange={(e) => setRecordOutput(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Scores"
+              className="input input-bordered"
+              value={record_scores}
+              onChange={(e) => setRecordScores(e.target.value)}
+              required
+            />
+            <button type="submit" className="btn btn-accent">
+              Add Record Only
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default page;
