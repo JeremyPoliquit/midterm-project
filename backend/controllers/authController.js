@@ -33,6 +33,21 @@ exports.student = async (req, res, db) => {
   );
 };
 
+exports.records = async (req, res, db) => {
+  const { course_code, output, scores, student_number } = req.body;
+
+  const insertQuery =
+    "INSERT INTO records (course_code, output, scores, student_number) VALUES (?, ?, ?, ?)";
+  db.query(
+    insertQuery,
+    [course_code, output, scores, student_number],
+    (err, result) => {
+      if (err) return res.status(500).json({ error: "Insert record error" });
+      res.status(201).json({ message: "Record created" });
+    }
+  );
+};
+
 exports.register = async (req, res, db) => {
   const { user_number, user_password, student_number } = req.body;
   const hashedPassword = await bcrypt.hash(user_password, 10);
@@ -90,7 +105,9 @@ exports.login = async (req, res, db) => {
         }
 
         if (studentResult.length === 0) {
-          return res.status(404).json({ message: "Student info not found second" });
+          return res
+            .status(404)
+            .json({ message: "Student info not found second" });
         }
 
         // Step 4: Generate JWT
@@ -101,7 +118,7 @@ exports.login = async (req, res, db) => {
         // Step 5: Send response
         res.json({
           message: "Login successful",
-          token
+          token,
         });
       });
     });
@@ -116,14 +133,20 @@ exports.profile = async (req, res, db) => {
 
   const query = `
     SELECT 
-      student_number,
-      student_name, 
-      course, 
-      year_level, 
-      semester, 
-      student_status
-    FROM students_info
-    WHERE student_number = ?
+      s.student_number,
+      s.student_name, 
+      s.course, 
+      s.year_level, 
+      s.semester, 
+      s.student_status,
+      r.record_id,
+      r.course_code,
+      r.output,
+      r.scores,
+      r.createdAt
+    FROM students_info s
+    LEFT JOIN records r ON s.student_number = r.student_number
+    WHERE s.student_number = ?
   `;
 
   db.query(query, [student_number], (err, results) => {
@@ -136,7 +159,35 @@ exports.profile = async (req, res, db) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    res.json(results[0]);
+    const {
+      student_number,
+      student_name,
+      course,
+      year_level,
+      semester,
+      student_status,
+    } = results[0];
+
+    const records = results
+      .filter((row) => row.record_id !== null) // skip null rows (in case walang records)
+      .map((row) => ({
+        record_id: row.record_id,
+        course_code: row.course_code,
+        output: row.output,
+        scores: row.scores,
+        createdAt: row.createdAt,
+      }));
+
+    res.json({
+      user: {
+        student_number,
+        student_name,
+        course,
+        year_level,
+        semester,
+        student_status,
+        records,
+      },
+    });
   });
 };
-
