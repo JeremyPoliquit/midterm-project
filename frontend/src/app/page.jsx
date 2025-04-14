@@ -54,45 +54,68 @@ const page = () => {
   };
 
   return (
-    <div
-      className="flex justify-center items-center"
-      style={{ minHeight: "100vh" }}
-    >
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Student Number Input */}
-        <div>
-          <label className="input validator">
-            <input
-              type="text"
-              name="student_number"
-              onChange={handleChange}
-              placeholder="202311242"
-              required
-            />
-          </label>
-        </div>
+    <div className="flex justify-center items-center min-h-screen">
+      <div className="w-full max-w-lg px-6">
+        <h1 className="text-xl font-semibold text-center mb-6">
+          CvSU Bacoor Student Record
+        </h1>
 
-        {/* Password Input */}
-        <div>
-          <label className="input validator">
-            <input
-              type="password"
-              name="user_password"
-              onChange={handleChange}
-              required
-              placeholder="Password"
-              minLength={8}
-              pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-              title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
-            />
-          </label>
-        </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-lg">
+          {/* Student Number Input */}
+          <div>
+            <label className="input validator w-full">
+              <input
+                type="text"
+                name="student_number"
+                onChange={handleChange}
+                placeholder="202311242"
+                minLength={9}
+                title="Must be 8 whole numbers only"
+                required
+              />
+            </label>
+            <p className="validator-hint hidden">
+              Must be 9 whole numbers only
+              <br />
+              No any words
+              <br />
+              No special characters
+            </p>
+          </div>
 
-        {/* Submit Button */}
-        <button type="submit" className="btn btn-success btn-wide">
-          Login
-        </button>
-      </form>
+          {/* Password Input */}
+          <div>
+            <label className="input validator w-full">
+              <input
+                type="password"
+                name="user_password"
+                onChange={handleChange}
+                required
+                placeholder="Password"
+                minLength="8"
+                pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
+              />
+            </label>
+            <p className="validator-hint hidden">
+              Must be more than 8 characters, including
+              <br />
+              At least one number
+              <br />
+              At least one lowercase letter
+              <br />
+              At least one uppercase letter
+            </p>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center">
+            <button type="submit" className="btn btn-success btn-wide">
+              Login
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
