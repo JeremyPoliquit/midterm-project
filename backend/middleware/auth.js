@@ -15,5 +15,13 @@ const verifyToken = (req, res, next) => {
   });
 };
 
+exports.requireRole = (role) => {
+  return (req, res, next) => {
+    if (req.user.user_role !== role) {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    next();
+  };
+};
 
 module.exports = verifyToken;
