@@ -1,8 +1,9 @@
 const express = require('express');
-const { create } = require('../controllers/authController');
+const { student, records } = require('../controllers/authController');
 
 module.exports = (db) => {
   const router = express.Router();
-  router.post('/create', (req, res) => create(req, res, db));
+  router.post('/create', (req, res) => student(req, res, db));
+  router.post('/create/record', (req, res) => records(req, res, db));
   return router;
 };
