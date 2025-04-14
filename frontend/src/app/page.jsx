@@ -70,6 +70,8 @@ const page = () => {
                 onChange={handleChange}
                 placeholder="202311242"
                 minLength={9}
+                maxLength={9}
+                pattern="^\d{9}$"
                 title="Must be 8 whole numbers only"
                 required
               />
