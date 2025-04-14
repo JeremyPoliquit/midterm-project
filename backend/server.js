@@ -24,7 +24,7 @@ db.connect(err => {
 });
 
 app.use('/api/student', crudRoutes(db)); // student crud
-app.use('/api/auth', authRoutes(db)); // register/login
+app.use('/api/auth', authRoutes(db)); // register/login/profile admin
 
 
 app.listen(5000, () => console.log('Backend running on port 5000'));
