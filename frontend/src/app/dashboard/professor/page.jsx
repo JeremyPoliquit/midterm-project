@@ -146,9 +146,9 @@ const page = () => {
       );
       alert("Record inserted successfully!");
       setRecordStudentNumber("")
-      setCourseCode("");
-      setOutput("");
-      setScores("");
+      setRecordCourseCode("");
+      setRecordOutput("");
+      setRecordScores("");
     } catch (err) {
       console.error(err);
       alert("Record only insert failed.");
