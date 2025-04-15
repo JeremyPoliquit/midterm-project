@@ -41,12 +41,26 @@ const page = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold">Welcome, {user.student_name}</h1>
-      <p>Student #: {user.student_number}</p>
-      <p>Course: {user.course}</p>
-      <p>Year Level: {user.year_level}</p>
-      <p>Semester: {user.semester}</p>
-      <p>Status: {user.student_status}</p>
+      <div className="flex justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Welcome, {user.student_name}</h1>
+          <p>Student #: {user.student_number}</p>
+          <p>Course: {user.course}</p>
+          <p>Year Level: {user.year_level}</p>
+          <p>Semester: {user.semester}</p>
+          <p>Status: {user.student_status}</p>
+        </div>
+
+        <div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn btn-error mt-4"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
       <div className="mt-6 overflow-x-auto">
         <h2 className="text-xl font-bold mb-4">My Records</h2>
@@ -79,10 +93,6 @@ const page = () => {
           </tbody>
         </table>
       </div>
-
-      <button onClick={handleLogout} className="btn btn-danger mt-4">
-        Logout
-      </button>
     </div>
   );
 };
