@@ -35,7 +35,7 @@ const page = () => {
     router.push("/");
   };
 
-  if (!user) return <div>Loading...</div>;
+  if (!user) return <div className="font-semibold">Can't access this page</div>;
 
   const latestRecord = user.records?.[0]; // optional: latest record lang
 

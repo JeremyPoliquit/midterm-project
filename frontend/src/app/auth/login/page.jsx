@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
-
 const page = () => {
   const [userName, setUserName] = useState("");
   const [userPassword, setUserPassword] = useState("");
@@ -53,34 +52,58 @@ const page = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-4 border rounded shadow">
-      <h1 className="text-2xl font-semibold mb-4">Admin/Professor Login</h1>
-      <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          className="w-full p-2 border rounded mb-2"
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={userPassword}
-          onChange={(e) => setUserPassword(e.target.value)}
-          className="w-full p-2 border rounded mb-4"
-          required
-        />
-        {error && <p className="text-red-500 mb-2">{error}</p>}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-        >
-          Login
-        </button>
-      </form>
-    </div>
+    <>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-full max-w-lg px-6">
+          <h1 className="text-xl font-semibold text-center mb-6">
+            CvSU Bacoor Authorize Personel
+          </h1>
+
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 max-w-lg">
+            {/* Student Number Input */}
+            <div>
+              <input
+                type="text"
+                className="input validator w-full"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Josh Doe"
+                required
+              />
+            </div>
+
+            {/* Password Input */}
+            <div>
+              <label className="input validator w-full">
+                <input
+                  type="password"
+                  value={userPassword}
+                  onChange={(e) => setUserPassword(e.target.value)}
+                  required
+                  placeholder="Password"
+                  pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                  title="Must be more than 8 characters, including number, lowercase letter, uppercase letter"
+                />
+              </label>
+              <p className="validator-hint hidden">
+                At least one number
+                <br />
+                At least one lowercase letter
+                <br />
+                At least one uppercase letter
+              </p>
+            </div>
+
+            {/* Submit Button */}
+            <div className="flex justify-center">
+              <button type="submit" className="btn btn-success btn-wide">
+                Login
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </>
   );
 };
 

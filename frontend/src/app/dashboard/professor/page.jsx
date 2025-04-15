@@ -9,6 +9,7 @@ import { jwtDecode } from "jwt-decode";
 
 const page = () => {
   const [token, setToken] = useState(null);
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState(null);
 
   // Full Insert Form
@@ -32,7 +33,19 @@ const page = () => {
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
-    if (!storedToken) return;
+    if (!storedToken) {
+      router.push("/auth/login");
+      return;
+    };
+
+    try {
+      const decoded = jwtDecode(storedToken);
+      if (decoded.user_role !== "professor") {
+        router.push("/auth/login");
+      }
+    } catch (err) {
+      router.push("/auth/login");
+    }
 
     setToken(storedToken);
     const decoded = jwtDecode(storedToken);
@@ -141,6 +154,9 @@ const page = () => {
       alert("Record only insert failed.");
     }
   };
+
+  if (!userInfo) return <div className="font-semibold">Can't access this page</div>;
+
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">Professor Dashboard</h1>

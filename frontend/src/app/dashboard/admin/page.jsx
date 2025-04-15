@@ -1,33 +1,44 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
 const page = () => {
   const router = useRouter();
+  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const storedToken = localStorage.getItem("token");
 
-    if (!token) {
+    if (!storedToken) {
       router.push("/auth/login");
       return;
     }
 
     try {
-      const decoded = jwtDecode(token);
+      const decoded = jwtDecode(storedToken);
       if (decoded.user_role !== "admin") {
         router.push("/auth/login");
       }
     } catch (err) {
       router.push("/auth/login");
     }
+
+    setToken(storedToken);
+    const decoded = jwtDecode(storedToken);
+    setUser(decoded);
   }, []);
 
-  return (
-    <div>Welcome Admin Dashboard</div>
-  )
-}
+  if (!user) return <div className="font-semibold">Can't access this page</div>;
 
-export default page
+  return (
+    <>
+      <h1>Welcome Admin Dashboard</h1>
+      <p>Dashboard</p>
+    </>
+  );
+};
+
+export default page;
