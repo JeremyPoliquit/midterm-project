@@ -10,11 +10,13 @@ import { jwtDecode } from "jwt-decode";
 const page = () => {
   const [token, setToken] = useState(null);
   const router = useRouter();
+  const [user, setUser] = useState(null);
   const [userInfo, setUserInfo] = useState(null);
 
   // Full Insert Form
   const [student_number, setStudentNumber] = useState("");
   const [student_name, setStudentName] = useState("");
+  const [section, setSection] = useState("");
   const [course, setCourse] = useState("");
   const [year_level, setYearLevel] = useState("");
   const [semester, setSemester] = useState("");
@@ -36,7 +38,7 @@ const page = () => {
     if (!storedToken) {
       router.push("/auth/login");
       return;
-    };
+    }
 
     try {
       const decoded = jwtDecode(storedToken);
@@ -49,7 +51,7 @@ const page = () => {
 
     setToken(storedToken);
     const decoded = jwtDecode(storedToken);
-    setUserInfo(decoded);
+    setUser(decoded);
   }, []);
 
   const handleFullInsert = async (e) => {
@@ -59,6 +61,7 @@ const page = () => {
     if (
       !student_number ||
       !student_name ||
+      !section ||
       !course ||
       !year_level ||
       !semester ||
@@ -79,6 +82,7 @@ const page = () => {
         {
           student_number,
           student_name,
+          section,
           course,
           year_level,
           semester,
@@ -99,6 +103,7 @@ const page = () => {
       // Reset form after successful submission (optional)
       setStudentNumber("");
       setStudentName("");
+      setSection("");
       setCourse("");
       setYearLevel("");
       setSemester("");
@@ -145,7 +150,7 @@ const page = () => {
         }
       );
       alert("Record inserted successfully!");
-      setRecordStudentNumber("")
+      setRecordStudentNumber("");
       setRecordCourseCode("");
       setRecordOutput("");
       setRecordScores("");
@@ -155,11 +160,51 @@ const page = () => {
     }
   };
 
-  if (!userInfo) return <div className="font-semibold">Can't access this page</div>;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    fetch("http://localhost:5000/api/auth/profile/admin", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Unauthorized or bad response");
+        return res.json();
+      })
+      .then((data) => {
+        setUser(data.user); // ✅ fixed here
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("token")
+    router.push("/auth/login") // Authorized Personel 
+  }
+
+  if (!user) return <div className="font-semibold">Can't access this page</div>;
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Professor Dashboard</h1>
+      <div className="flex justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-bold mb-6">Professor Dashboard</h1>
+          <p>Welcome, {user.user_name}</p>
+        </div>
+
+        <div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn btn-error mt-4"
+          >
+            Logout
+          </button>
+        </div>
+      </div>
 
       <div className="grid md:grid-cols-2 gap-10">
         {/* Full Insert Form */}
@@ -180,6 +225,13 @@ const page = () => {
               placeholder="Student Name"
               className="input input-bordered"
               onChange={(e) => setStudentName(e.target.value)}
+              required
+            />
+            <input
+              type="text"
+              placeholder="Section"
+              className="input input-bordered"
+              onChange={(e) => setSection(e.target.value)}
               required
             />
             <input
