@@ -115,6 +115,42 @@ exports.addRecordStudent = async (req, res, db) => {
   }
 };
 
+exports.addScheduleOnly = async (req, res, db) => {
+  const {
+    student_number,
+    course_code,
+    room,
+    professor,
+    sched_day,
+    sched_time,
+  } = req.body;
+
+  try {
+    const checkQuery = "SELECT * FROM students_info WHERE student_number = ?";
+    db.query(checkQuery, [student_number], (err, result) => {
+      if (err) return res.status(500).json({ err: "DB Error" });
+
+      if (result.length === 0)
+        return res.status(404).json({ error: "Student number not found" });
+
+      const insertQuery =
+        "INSERT INTO students_sched (student_number, course_code, room, professor, sched_day) VALUES (?, ?, ?, ?, ?, ?)";
+      db.query(
+        insertQuery,
+        [student_number, course_code, room, professor, sched_day, sched_time],
+        (err) => {
+          if (err)
+            return res.status(500).json({ error: "Error inserting sched" });
+
+          res.status(201).json({ message: "Schedule added successfully" });
+        }
+      );
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server Error " });
+  }
+};
+
 // profile of student
 exports.profile = async (req, res, db) => {
   const student_number = req.user.student_number;

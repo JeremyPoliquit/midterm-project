@@ -2,6 +2,8 @@ const express = require("express");
 const {
   createStudentRecord,
   addRecordStudent,
+  addScheduleOnly,
+  math,
   profile,
 } = require("../controllers/studentController");
 const verifyToken = require("../middleware/auth");
@@ -11,6 +13,7 @@ module.exports = (db) => {
   router.post("/create/record", (req, res) =>
     createStudentRecord(req, res, db)
   );
+  router.post("/add-schedule-only", (req, res) => addScheduleOnly(req, res, db));
   router.post("/add-record-only", (req, res) => addRecordStudent(req, res, db));
   router.get("/profile", verifyToken, (req, res) => profile(req, res, db)); // record of student
   return router;
