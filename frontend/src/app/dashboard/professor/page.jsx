@@ -3,6 +3,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -26,6 +27,14 @@ const page = () => {
   const [course_code, setCourseCode] = useState("");
   const [output, setOutput] = useState("");
   const [scores, setScores] = useState("");
+
+  // Add Sched only
+  const [schedule_student_number, setScheduleStudentNumber] = useState("");
+  const [schedule_course_code, setScheduleCourseCode] = useState("");
+  const [schedule_room, setScheduleRoom] = useState("");
+  const [schedule_professor, setScheduleProfessor] = useState("");
+  const [schedule_timeIn, setScheduleTimeIn] = useState("");
+  const [schedule_timeOut, setScheduleTimeOut] = useState("");
 
   // Add Record Only Form
   const [record_student_number, setRecordStudentNumber] = useState("");
@@ -78,7 +87,7 @@ const page = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/student/create/record",
+        "http://localhost:5000/api/student/create/student/record",
         {
           student_number,
           student_name,
@@ -160,6 +169,40 @@ const page = () => {
     }
   };
 
+  const handleScheduleOnlyInsert = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/api/student/add-schedule-only",
+        {
+          student_number: schedule_student_number,
+          course_code: schedule_course_code,
+          room: schedule_room, // bago: “room”
+          professor: schedule_professor, // bago: “professor”
+          sched_in: schedule_timeIn, // bago: “sched_in”
+          sched_out: schedule_timeOut, // bago: “sched_out”
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      alert("Schedule inserted successfully");
+      setScheduleStudentNumber("");
+      setScheduleCourseCode("");
+      setScheduleRoom("");
+      setScheduleProfessor("");
+      setScheduleTimeIn("");
+      setScheduleTimeOut("");
+    } catch (error) {
+      console.error(error);
+      alert("Schedule only insert failed.");
+    }
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -181,18 +224,22 @@ const page = () => {
   });
 
   const handleLogout = () => {
-    localStorage.removeItem("token")
-    router.push("/auth/login") // Authorized Personel 
-  }
+    localStorage.removeItem("token");
+    router.push("/auth/login"); // Authorized Personel
+  };
 
   if (!user) return <div className="font-semibold">Can't access this page</div>;
 
   return (
-    <div className="p-8">
+    <div className="flex flex-col gap-8 mx-12 my-8">
       <div className="flex justify-between">
         <div className="flex flex-col">
-          <h1 className="text-3xl font-bold mb-6">Professor Dashboard</h1>
+          <h1 className="text-3xl font-bold mb-6">Professor Homepage</h1>
           <p>Welcome, {user.user_name}</p>
+
+          <Link href="/dashboard/professor/panel">
+            <p className="text-green-400">Go to Panel</p>
+          </Link>
         </div>
 
         <div>
@@ -304,47 +351,121 @@ const page = () => {
         </div>
 
         {/* Record Only Form */}
-        <div className="bg-base-200 p-6 rounded-xl shadow-xl">
-          <h2 className="text-xl font-bold mb-4">
-            Add Output to Existing Student
-          </h2>
-          <form onSubmit={handleRecordOnlyInsert} className="grid gap-4">
-            <input
-              type="text"
-              placeholder="Student Number"
-              className="input input-bordered"
-              value={record_student_number}
-              onChange={(e) => setRecordStudentNumber(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Course Code"
-              className="input input-bordered"
-              value={record_course_code}
-              onChange={(e) => setRecordCourseCode(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Output"
-              className="input input-bordered"
-              value={record_output}
-              onChange={(e) => setRecordOutput(e.target.value)}
-              required
-            />
-            <input
-              type="text"
-              placeholder="Scores"
-              className="input input-bordered"
-              value={record_scores}
-              onChange={(e) => setRecordScores(e.target.value)}
-              required
-            />
-            <button type="submit" className="btn btn-accent">
-              Add Record Only
-            </button>
-          </form>
+        <div className="bg-base-200 p-6 rounded-xl shadow-xl flex flex-col gap-6">
+          <div>
+            <h2 className="text-xl font-bold mb-4">
+              Add Output to Existing Student
+            </h2>
+            <form onSubmit={handleRecordOnlyInsert} className="grid gap-4">
+              <input
+                type="text"
+                placeholder="Student Number"
+                className="input input-bordered"
+                value={record_student_number}
+                onChange={(e) => setRecordStudentNumber(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Course Code"
+                className="input input-bordered"
+                value={record_course_code}
+                onChange={(e) => setRecordCourseCode(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Output"
+                className="input input-bordered"
+                value={record_output}
+                onChange={(e) => setRecordOutput(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Scores"
+                className="input input-bordered"
+                value={record_scores}
+                onChange={(e) => setRecordScores(e.target.value)}
+                required
+              />
+              <button type="submit" className="btn btn-accent">
+                Add Record Only
+              </button>
+            </form>
+          </div>
+
+          {/* Class Schedule */}
+          <div>
+            <h2 className="text-xl font-bold mb-4">Add Schedule</h2>
+
+            <form
+              onSubmit={handleScheduleOnlyInsert}
+              className="flex flex-col gap-4"
+            >
+              <input
+                type="text"
+                placeholder="Student Number"
+                className="input input-bordered"
+                value={schedule_student_number}
+                onChange={(e) => setScheduleStudentNumber(e.target.value)}
+                required
+              />
+
+              <input
+                type="text"
+                placeholder="Course Code"
+                className="input input-bordered"
+                value={schedule_course_code}
+                onChange={(e) => setScheduleCourseCode(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="room"
+                className="input input-bordered"
+                value={schedule_room}
+                onChange={(e) => setScheduleRoom(e.target.value)}
+                required
+              />
+              <input
+                type="text"
+                placeholder="professor"
+                className="input input-bordered"
+                value={schedule_professor}
+                onChange={(e) => setScheduleProfessor(e.target.value)}
+                required
+              />
+
+              <div className="flex justify-between">
+                <div>
+                  <label className="input">
+                    <p>Time In</p>
+                    <input
+                      type="time"
+                      value={schedule_timeIn}
+                      onChange={(e) => setScheduleTimeIn(e.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <div>
+                  <label className="input">
+                    <p>Time Out</p>
+                    <input
+                      type="time"
+                      value={schedule_timeOut}
+                      onChange={(e) => setScheduleTimeOut(e.target.value)}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-accent">
+                Add Schedule
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
