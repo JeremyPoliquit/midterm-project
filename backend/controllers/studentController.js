@@ -116,16 +116,10 @@ exports.addRecordStudent = async (req, res, db) => {
 };
 
 exports.addScheduleOnly = async (req, res, db) => {
-  const {
-    student_number,
-    course_code,
-    room,
-    professor,
-    sched_day,
-    sched_time,
-  } = req.body;
+  const { student_number, course_code, room, professor, sched_day, sched_in, sched_out } = req.body;
 
   try {
+    // First, check if the student exists
     const checkQuery = "SELECT * FROM students_info WHERE student_number = ?";
     db.query(checkQuery, [student_number], (err, result) => {
       if (err) return res.status(500).json({ err: "DB Error" });
@@ -133,22 +127,81 @@ exports.addScheduleOnly = async (req, res, db) => {
       if (result.length === 0)
         return res.status(404).json({ error: "Student number not found" });
 
+      // Now insert the schedule data
       const insertQuery =
-        "INSERT INTO students_sched (student_number, course_code, room, professor, sched_day) VALUES (?, ?, ?, ?, ?, ?)";
+        "INSERT INTO students_sched (student_number, course_code, room, professor, sched_day, sched_in, sched_out) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      
       db.query(
         insertQuery,
-        [student_number, course_code, room, professor, sched_day, sched_time],
+        [student_number, course_code, room, professor, sched_day, sched_in, sched_out],
         (err) => {
           if (err)
-            return res.status(500).json({ error: "Error inserting sched" });
+            return res.status(500).json({ error: "Error inserting schedule" });
 
           res.status(201).json({ message: "Schedule added successfully" });
         }
       );
     });
   } catch (error) {
-    res.status(500).json({ error: "Server Error " });
+    res.status(500).json({ error: "Server Error" });
   }
+};
+
+
+exports.deleteRecord = (req, res, db) => {
+  const { record_id } = req.params;
+
+  const query = `DELETE FROM records WHERE record_id = ?`;
+
+  db.query(query, [record_id], (err, result) => {
+    if (err) {
+      console.error("Error deleting record:", err);
+      return res.status(500).json({ message: "Failed to delete record." });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Record not found." });
+    }
+
+    res.status(200).json({ message: "Record deleted successfully." });
+  });
+};
+
+// controllers/
+exports.getByStudentNumber = (req, res, db) => {
+  const query = `
+    SELECT 
+      s.student_number,
+      s.student_name,
+      r.record_id,
+      r.course_code,
+      r.output,
+      r.scores,
+      r.createdAt
+    FROM students_info s
+    LEFT JOIN records r ON s.student_number = r.student_number
+    WHERE r.record_id IS NOT NULL
+    ORDER BY r.createdAt DESC
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error("Database error:", err);
+      return res.status(500).json({ message: "Server error" });
+    }
+
+    const records = results.map((row) => ({
+      record_id: row.record_id,
+      student_number: row.student_number,
+      student_name: row.student_name,
+      course_code: row.course_code,
+      output: row.output,
+      scores: row.scores,
+      createdAt: row.createdAt,
+    }));
+
+    res.json({ records });
+  });
 };
 
 // profile of student
@@ -164,6 +217,7 @@ exports.profile = async (req, res, db) => {
         s.year_level, 
         s.semester, 
         s.student_status,
+        
         r.record_id,
         r.course_code,
         r.output,
@@ -218,3 +272,43 @@ exports.profile = async (req, res, db) => {
     });
   });
 };
+
+
+exports.getSchedule = (req, res, db) => {
+  const { student_number } = req.query;
+
+  try {
+    if (!student_number) {
+      return res.status(400).json({ error: "Student number is required" });
+    }
+
+    const query = `
+      SELECT s.sched_day, s.sched_in AS sched_time_in, s.sched_out AS sched_time_out, s.course_code, s.professor, s.room
+      FROM students_sched s
+      JOIN students_info si ON s.student_number = si.student_number
+      WHERE s.student_number = ?
+      ORDER BY FIELD(s.sched_day, 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'), s.sched_in
+    `;
+
+    db.query(query, [student_number], (err, result) => {
+      if (err) {
+        console.error("Database query error:", err);  // Log the error for debugging
+        return res.status(500).json({ error: "Database error", details: err.message });
+      }
+
+      if (result.length === 0) {
+        return res.status(404).json({ error: "No schedule found for this student number" });
+      }
+
+      res.json(result);  // Respond with schedule data
+    });
+  } catch (error) {
+    console.error("Error fetching schedule:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+
+exports.addRecord = (req, res, db) => {
+  const  { name, age } = req.body
+}

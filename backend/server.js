@@ -2,13 +2,15 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const crudRoutes= require('./routes/crud')
+const crudRoutes= require('./routes/crud');
 
-const app = express();
+const app = express();  
+
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true
 }));
+
 app.use(express.json());
 
 const db = mysql.createConnection({
